@@ -27,10 +27,9 @@ class PersonRepositoryImpl implements PersonRepository {
   }
 
   @override
-  Future<Either<Failure, List<PersonEntity>>> searchPerson(
-      String query, int page) async {
+  Future<Either<Failure, List<PersonEntity>>> searchPerson(String query) async {
     return await _getPersons(() {
-      return remoteDataSource.searchPerson(query, page);
+      return remoteDataSource.searchPerson(query);
     });
   }
 
@@ -46,8 +45,8 @@ class PersonRepositoryImpl implements PersonRepository {
       }
     } else {
       try {
-        final locationPerson = await localDataSource.getLastPersonsFromCache();
-        return Right(locationPerson);
+        final localPerson = await localDataSource.getLastPersonsFromCache();
+        return Right(localPerson);
       } on CacheException {
         return Left(CacheFailure());
       }

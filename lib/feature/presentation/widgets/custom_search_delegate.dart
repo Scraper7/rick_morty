@@ -9,18 +9,6 @@ import 'package:flutter_rick_and_morty_app/feature/presentation/widgets/search_r
 class CustomSearchDelegate extends SearchDelegate {
   CustomSearchDelegate() : super(searchFieldLabel: 'Search for characters...');
 
-  final scrollController = ScrollController();
-
-  void setupScrollController(BuildContext context) {
-    scrollController.addListener(() {
-      if (scrollController.position.atEdge) {
-        if (scrollController.position.pixels != 0) {
-          context.read<PersonSearchBloc>().add(LoadMorePersons(query: query));
-        }
-      }
-    });
-  }
-
   final _suggestions = [
     'Rick',
     'Morty',
@@ -33,7 +21,7 @@ class CustomSearchDelegate extends SearchDelegate {
   List<Widget> buildActions(BuildContext context) {
     return [
       IconButton(
-          icon: Icon(Icons.clear),
+          icon: const Icon(Icons.clear),
           onPressed: () {
             query = '';
             showSuggestions(context);
@@ -43,9 +31,8 @@ class CustomSearchDelegate extends SearchDelegate {
 
   @override
   Widget buildLeading(BuildContext context) {
-    setupScrollController(context);
     return IconButton(
-        icon: Icon(Icons.arrow_back_outlined),
+        icon: const Icon(Icons.arrow_back_outlined),
         tooltip: 'Back',
         onPressed: () => close(context, null));
   }
@@ -55,12 +42,12 @@ class CustomSearchDelegate extends SearchDelegate {
     print('Inside custom search delegate and search query is $query');
 
     BlocProvider.of<PersonSearchBloc>(context, listen: false)
-      ..add(SearchPersons(query));
+        .add(SearchPersons(query));
 
     return BlocBuilder<PersonSearchBloc, PersonSearchState>(
       builder: (context, state) {
         if (state is PersonSearchLoading) {
-          return Center(
+          return const Center(
             child: CircularProgressIndicator(),
           );
         } else if (state is PersonSearchLoaded) {
@@ -68,38 +55,17 @@ class CustomSearchDelegate extends SearchDelegate {
           if (person.isEmpty) {
             return _showErrorText('No Characters with that name found');
           }
-          return Container(
-            child: ListView.builder(
-              controller: scrollController,
-              itemCount: person.isNotEmpty ? person.length : 0,
-              itemBuilder: (context, int index) {
-                PersonEntity result = person[index];
-                return SearchResult(personResult: result);
-              },
-            ),
-          );
-        } else if (state is PersonSearchLoadingMore) {
-          final person = state.oldPersons;
-          return Container(
-            child: ListView.builder(
-              controller: scrollController,
-              itemCount: person.isNotEmpty ? person.length + 1 : 0,
-              itemBuilder: (context, int index) {
-                if (index < person.length) {
-                  PersonEntity result = person[index];
-                  return SearchResult(personResult: result);
-                } else {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-              },
-            ),
+          return ListView.builder(
+            itemCount: person.isNotEmpty ? person.length : 0,
+            itemBuilder: (context, int index) {
+              PersonEntity result = person[index];
+              return SearchResult(personResult: result);
+            },
           );
         } else if (state is PersonSearchError) {
           return _showErrorText(state.message);
         } else {
-          return Center(
+          return const Center(
             child: Icon(Icons.now_wallpaper),
           );
         }
@@ -113,7 +79,7 @@ class CustomSearchDelegate extends SearchDelegate {
       child: Center(
         child: Text(
           errorMessage,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 20.0,
             fontWeight: FontWeight.bold,
           ),
@@ -124,23 +90,23 @@ class CustomSearchDelegate extends SearchDelegate {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    if (query.length > 0) {
+    if (query.isNotEmpty) {
       return Container();
     }
 
     return ListView.separated(
-      padding: EdgeInsets.all(10),
+      padding: const EdgeInsets.all(10),
       itemBuilder: (context, index) {
         return Text(
           _suggestions[index],
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 16.0,
             fontWeight: FontWeight.w400,
           ),
         );
       },
       separatorBuilder: (context, index) {
-        return Divider();
+        return const Divider();
       },
       itemCount: _suggestions.length,
     );

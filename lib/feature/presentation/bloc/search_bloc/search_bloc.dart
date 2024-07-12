@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_rick_and_morty_app/core/error/failure.dart';
 import 'package:flutter_rick_and_morty_app/feature/domain/usecases/search_person.dart';
@@ -7,45 +9,22 @@ import 'package:flutter_rick_and_morty_app/feature/presentation/bloc/search_bloc
 const SERVER_FAILURE_MESSAGE = 'Server Failure';
 const CACHED_FAILURE_MESSAGE = 'Cache Failure';
 
+// BLoC 8.0.0
 class PersonSearchBloc extends Bloc<PersonSearchEvent, PersonSearchState> {
   final SearchPerson searchPerson;
-  int currentPage = 1;
-  bool isFetching = false;
 
-  PersonSearchBloc({required this.searchPerson}) : super(PersonEmpty()) {
-    on<SearchPersons>(_onSearchPersons);
-    on<LoadMorePersons>(_onLoadMorePersons);
+  PersonSearchBloc({required this.searchPerson}) : super(PersonSearchEmpty()) {
+    on<SearchPersons>(_onEvent);
   }
 
-  void _onSearchPersons(
+  FutureOr<void> _onEvent(
       SearchPersons event, Emitter<PersonSearchState> emit) async {
     emit(PersonSearchLoading());
-    currentPage = 1; // Reset to first page for new search
-
-    final failureOrPerson = await searchPerson(
-        SearchPersonParams(query: event.personQuery, page: currentPage));
+    final failureOrPerson =
+        await searchPerson(SearchPersonParams(query: event.personQuery));
     emit(failureOrPerson.fold(
-      (failure) => PersonSearchError(message: _mapFailureToMessage(failure)),
-      (person) => PersonSearchLoaded(persons: person),
-    ));
-  }
-
-  void _onLoadMorePersons(
-      LoadMorePersons event, Emitter<PersonSearchState> emit) async {
-    final currentState = state;
-    if (currentState is PersonSearchLoaded && !isFetching) {
-      isFetching = true;
-      emit(PersonSearchLoadingMore(currentState.persons));
-      currentPage++;
-
-      final failureOrPerson = await searchPerson(
-          SearchPersonParams(query: event.query, page: currentPage));
-      emit(failureOrPerson.fold(
         (failure) => PersonSearchError(message: _mapFailureToMessage(failure)),
-        (person) => PersonSearchLoaded(persons: currentState.persons + person),
-      ));
-      isFetching = false;
-    }
+        (person) => PersonSearchLoaded(persons: person)));
   }
 
   String _mapFailureToMessage(Failure failure) {
@@ -55,7 +34,43 @@ class PersonSearchBloc extends Bloc<PersonSearchEvent, PersonSearchState> {
       case CacheFailure:
         return CACHED_FAILURE_MESSAGE;
       default:
-        return 'Unexpected error';
+        return 'Unexpected Error';
     }
   }
 }
+
+// BLoC 7.2.0
+// class PersonSearchBloc extends Bloc<PersonSearchEvent, PersonSearchState> {
+//   final SearchPerson searchPerson;
+
+//   PersonSearchBloc({required this.searchPerson}) : super(PersonSearchEmpty());
+
+//   @override
+//   Stream<PersonSearchState> mapEventToState(PersonSearchEvent event) async* {
+//     if (event is SearchPersons) {
+//       yield* _mapFetchPersonsToState(event.personQuery);
+//     }
+//   }
+
+//   Stream<PersonSearchState> _mapFetchPersonsToState(String personQuery) async* {
+//     yield PersonSearchLoading();
+
+//     final failureOrPerson =
+//         await searchPerson(SearchPersonParams(query: personQuery));
+
+//     yield failureOrPerson.fold(
+//         (failure) => PersonSearchError(message: _mapFailureToMessage(failure)),
+//         (person) => PersonSearchLoaded(persons: person));
+//   }
+
+  // String _mapFailureToMessage(Failure failure) {
+  //   switch (failure.runtimeType) {
+  //     case ServerFailure:
+  //       return SERVER_FAILURE_MESSAGE;
+  //     case CacheFailure:
+  //       return CACHED_FAILURE_MESSAGE;
+  //     default:
+  //       return 'Unexpected Error';
+  //   }
+  // }
+// }

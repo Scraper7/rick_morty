@@ -13,7 +13,7 @@ abstract class PersonRemoteDataSource {
   /// Calls the https://rickandmortyapi.com/api/character/?name=rick endpoint.
   ///
   /// Throws a [ServerException] for all error codes.
-  Future<List<PersonModel>> searchPerson(String query, int page);
+  Future<List<PersonModel>> searchPerson(String query);
 }
 
 class PersonRemoteDataSourceImpl implements PersonRemoteDataSource {
@@ -26,9 +26,8 @@ class PersonRemoteDataSourceImpl implements PersonRemoteDataSource {
       'https://rickandmortyapi.com/api/character/?page=$page');
 
   @override
-  Future<List<PersonModel>> searchPerson(String query, int page) =>
-      _getPersonFromUrl(
-          'https://rickandmortyapi.com/api/character/?name=$query');
+  Future<List<PersonModel>> searchPerson(String query) => _getPersonFromUrl(
+      'https://rickandmortyapi.com/api/character/?name=$query');
 
   Future<List<PersonModel>> _getPersonFromUrl(String url) async {
     print(url);
