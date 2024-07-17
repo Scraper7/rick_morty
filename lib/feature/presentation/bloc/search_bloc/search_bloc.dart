@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_rick_and_morty_app/core/error/failure.dart';
-import 'package:flutter_rick_and_morty_app/feature/domain/entities/person_entity.dart';
 import 'package:flutter_rick_and_morty_app/feature/domain/usecases/get_all_persons.dart';
 import 'package:flutter_rick_and_morty_app/feature/domain/usecases/search_person.dart';
 import 'package:flutter_rick_and_morty_app/feature/presentation/bloc/search_bloc/search_event.dart';
