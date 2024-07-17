@@ -39,10 +39,13 @@ class CustomSearchDelegate extends SearchDelegate {
 
   @override
   Widget buildResults(BuildContext context) {
-    print('Inside custom search delegate and search query is $query');
-
-    BlocProvider.of<PersonSearchBloc>(context, listen: false)
-        .add(SearchPersons(query));
+    if (query.isEmpty) {
+      BlocProvider.of<PersonSearchBloc>(context, listen: false)
+          .add(SearchAllPersons(isNewQuery: true));
+    } else {
+      BlocProvider.of<PersonSearchBloc>(context, listen: false)
+          .add(SearchPersons(query, isNewQuery: true));
+    }
 
     return BlocBuilder<PersonSearchBloc, PersonSearchState>(
       builder: (context, state) {
@@ -51,16 +54,36 @@ class CustomSearchDelegate extends SearchDelegate {
             child: CircularProgressIndicator(),
           );
         } else if (state is PersonSearchLoaded) {
-          final person = state.persons;
-          if (person.isEmpty) {
+          final persons = state.persons;
+          if (persons.isEmpty) {
             return _showErrorText('No Characters with that name found');
           }
-          return ListView.builder(
-            itemCount: person.isNotEmpty ? person.length : 0,
-            itemBuilder: (context, int index) {
-              PersonEntity result = person[index];
-              return SearchResult(personResult: result);
+          return NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification scrollInfo) {
+              if (scrollInfo.metrics.pixels ==
+                  scrollInfo.metrics.maxScrollExtent) {
+                if (query.isEmpty) {
+                  BlocProvider.of<PersonSearchBloc>(context, listen: false)
+                      .add(SearchAllPersons(isPaging: true));
+                } else {
+                  BlocProvider.of<PersonSearchBloc>(context, listen: false)
+                      .add(SearchPersons(query, isPaging: true));
+                }
+              }
+              return false;
             },
+            child: ListView.builder(
+              itemCount: persons.length + 1,
+              itemBuilder: (context, int index) {
+                if (index == persons.length) {
+                  return state is PersonSearchLoadingMore
+                      ? Center(child: CircularProgressIndicator())
+                      : Container();
+                }
+                PersonEntity result = persons[index];
+                return SearchResult(personResult: result);
+              },
+            ),
           );
         } else if (state is PersonSearchError) {
           return _showErrorText(state.message);

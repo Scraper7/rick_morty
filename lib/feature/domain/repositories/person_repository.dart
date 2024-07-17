@@ -4,5 +4,6 @@ import 'package:flutter_rick_and_morty_app/feature/domain/entities/person_entity
 
 abstract class PersonRepository {
   Future<Either<Failure, List<PersonEntity>>> getAllPersons(int page);
-  Future<Either<Failure, List<PersonEntity>>> searchPerson(String query);
+  Future<Either<Failure, List<PersonEntity>>> searchPerson(
+      String query, int page);
 }

@@ -18,7 +18,8 @@ final sl = GetIt.instance;
 Future<void> init() async {
   // BLoC / Cubit
   sl.registerFactory(() => PersonListCubit(getAllPersons: sl<GetAllPersons>()));
-  sl.registerFactory(() => PersonSearchBloc(searchPerson: sl()));
+  sl.registerFactory(() => PersonSearchBloc(
+      searchPerson: sl(), getAllPersons: sl())); // Передача getAllPersons
 
   // UseCases
   sl.registerLazySingleton(() => GetAllPersons(sl()));
@@ -39,7 +40,6 @@ Future<void> init() async {
   );
 
   // Core
-
   sl.registerLazySingleton<NetworkInfo>(() => NetWorkInfoImp(sl()));
 
   // External

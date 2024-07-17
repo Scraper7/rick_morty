@@ -21,6 +21,15 @@ class PersonSearchLoaded extends PersonSearchState {
   List<Object> get props => [persons];
 }
 
+class PersonSearchLoadingMore extends PersonSearchState {
+  final List<PersonEntity> persons;
+
+  const PersonSearchLoadingMore(this.persons);
+
+  @override
+  List<Object> get props => [persons];
+}
+
 class PersonSearchError extends PersonSearchState {
   final String message;
 

@@ -27,9 +27,10 @@ class PersonRepositoryImpl implements PersonRepository {
   }
 
   @override
-  Future<Either<Failure, List<PersonEntity>>> searchPerson(String query) async {
+  Future<Either<Failure, List<PersonEntity>>> searchPerson(
+      String query, int page) async {
     return await _getPersons(() {
-      return remoteDataSource.searchPerson(query);
+      return remoteDataSource.searchPerson(query, page);
     });
   }
 
